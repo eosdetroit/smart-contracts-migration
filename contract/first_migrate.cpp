@@ -1,4 +1,4 @@
-void testcontract::migrate(uint8_t counter, uint8_t max_number_rows) {
+void testcontract::migrate(uint16_t counter, uint16_t max_number_rows) {
 
     //authenticate
     check(has_auth(get_self()), "Missing authority");
@@ -13,7 +13,7 @@ void testcontract::migrate(uint8_t counter, uint8_t max_number_rows) {
         migrations.set(_migration, get_self());
     }
     
-    uint8_t i = 0; //Migrated rows counter
+    uint16_t i = 0; //Migrated rows counter
 
     //Open tables that you are intending to migrate 
     //and their corresponding support table HERE

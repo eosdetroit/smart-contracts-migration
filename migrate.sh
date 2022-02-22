@@ -73,10 +73,22 @@ rm -rf src include
 rm -rf $file_supportTable "$contract.abi" "$contract.wasm"
 mkdir src include
 
-migration_table=$( echo cleos -u $url get table "$account" "$account" migration ) 
+migration_table=$( echo $(cleos -u $url get table "$account" "$account" migration) ) 
 if [[ "$migration_table" =~ "in_process" ]]; then
     in_process=$( echo "$migration_table" | grep -o '"in_process": [0-9]*' |  grep -o '[0-9]*$' )
 fi
+
+echo ">>> Creating $file_supportTable"
+cp -r "$old_sc_directory/include/." "./include"
+touch $file_supportTable
+
+for table in "${tables[@]}"
+do  
+    params="${table}[@]"
+    params_array=("${!params}")
+    
+    createSupportTable "${params_array[@]}" $file_supportTable "$file_include"
+done
 
 if [[ -z "$in_process" || "$in_process" == "1" ]]; then
     cp -r "$old_sc_directory/src/." "./src"
@@ -86,26 +98,15 @@ if [[ -z "$in_process" || "$in_process" == "1" ]]; then
     line=$(grep -n '};' "$file_include" | tail -1 | cut -d : -f 1)
     sed -i "$((line-1)) r $file_migrateTable"  "$file_include"
 
-
-    echo ">>> Creating $file_supportTable"
-    touch $file_supportTable
-
-    for table in "${tables[@]}"
-    do  
-        params="${table}[@]"
-        params_array=("${!params}")
-        
-        createSupportTable "${params_array[@]}" $file_supportTable "$file_include"
-    done
-
-
     echo ">>> Adding support tables to $contract.hpp file"
     sed -i '1i\\' $file_supportTable
     line=$(grep -n '};' "$file_include" | tail -1 | cut -d : -f 1)
     sed -i "$((line-1)) r $file_supportTable"  "$file_include"
 
     echo ">>> Pausing all actions while migrating"
-    sed -i -E "/(void|ACTION)(.*)\{/ r $file_checkMigrating" "$file_source"
+    sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
+    sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
+    sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
     echo ">>> Adding first migrate action in $file_source"
     sed -i -E '$a\ \n' "$file_source" 
@@ -114,10 +115,10 @@ if [[ -z "$in_process" || "$in_process" == "1" ]]; then
 
     echo ">>> Adding first migrate action definition in $file_include"
     if  grep "private:" "$file_include"; then
-        sed  -i '/private:/iACTION migrate(uint8_t counter, uint8_t max_number_rows);' "$file_include"
+        sed  -i '/private:/iACTION migrate(uint16_t counter, uint16_t max_number_rows);' "$file_include"
     else
         line=$(grep -n '};' "$file_include" | tail -1 | cut -d : -f 1)
-        sed -i "$((line-1)) a ACTION migrate\(uint8\_t counter\, uint8\_t max\_number\_rows\)\;"  "$file_include"
+        sed -i "$((line-1)) a ACTION migrate\(uint16\_t counter\, uint16\_t max\_number\_rows\)\;"  "$file_include"
     fi
 
 
@@ -143,8 +144,8 @@ if [[ -z "$in_process" || "$in_process" == "1" ]]; then
     mkdir src include
 fi
 
-migration_table=$( echo cleos -u $url get table "$account" "$account" migration ) 
-if [[ $migration_table =~ "in_process" ]]; then
+migration_table=$( echo $(cleos -u $url get table "$account" "$account" migration) ) 
+if [[ "$migration_table" =~ "in_process" ]]; then
     in_process=$( echo "$migration_table" | grep -o '"in_process": [0-9]*' |  grep -o '[0-9]*$' )
 fi
 
@@ -164,8 +165,9 @@ if [[ "$in_process" == "2" ]]; then
 
 
     echo ">>> Pausing all actions while migrating"
-    sed -i -E "/(void|ACTION)(.*)\{/ r $file_checkMigrating" "$file_source"
-
+    sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
+    sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
+    sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
     echo ">>> Adding second migrate action in $file_source"
     sed -i -E '$a\ \n' "$file_source"  
@@ -174,10 +176,10 @@ if [[ "$in_process" == "2" ]]; then
 
     echo ">>> Adding second migrate action definition in $file_include"
     if  grep "private:" "$file_include"; then
-        sed  -i '/private:/iACTION migrate(uint8_t counter, uint8_t max_number_rows);' "$file_include"
+        sed  -i '/private:/iACTION migrate(uint16_t counter, uint16_t max_number_rows);' "$file_include"
     else
         line=$(grep -n '};' "$file_include" | tail -1 | cut -d : -f 1)
-        sed -i "$((line-1)) a ACTION migrate\(uint8\_t counter \, uint8\_t max\_number\_rows\)\;"  "$file_include"
+        sed -i "$((line-1)) a ACTION migrate\(uint16\_t counter \, uint16\_t max\_number\_rows\)\;"  "$file_include"
     fi
     
 

@@ -17,8 +17,9 @@ function createSupportTable() {
     
     echo ">>> Copying $table table to $supportTable table"
     sed -i -E '$a\ \n' $file_supportTable  
-    sed -E "/TABLE $table/,/$tableType\s*\;/!d" $file_include >> $file_supportTable
+    sed -E "/(TABLE|struct \[\[eosio\:\:table\(\"$tableName\"\)\]\]) $table/,/$tableType\s*\;/!d" $file_include >> $file_supportTable
     sed -i "s/TABLE $table/TABLE $supportTable /g" $file_supportTable
+    sed -i "s/struct \[\[eosio\:\:table(\"$tableName\")\]\] $table/struct \[\[eosio\:\:table(\"$supportTableName\")\]\] $supportTable /g" $file_supportTable
     sed -i "s/$table\s*,/$supportTable,/g" $file_supportTable
     sed -i "s/$table\s*:/$supportTable:/g" $file_supportTable
     sed -i "s/$table\s*>/$supportTable>/g" $file_supportTable

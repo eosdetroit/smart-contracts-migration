@@ -15,12 +15,12 @@ fi
 file_source="src/$contract.cpp"
 file_include="include/$contract.hpp"
 
-old_sc_directory="contract/old_contract"
-new_sc_directory="contract/new_contract"
-file_firstMigrate="contract/first_migrate.cpp"
-file_secondMigrate="contract/second_migrate.cpp"
+old_sc_directory="$contract/old_contract"
+new_sc_directory="$contract/new_contract"
+file_firstMigrate="$contract/first_migrate.cpp"
+file_secondMigrate="$contract/second_migrate.cpp"
 
-source contract/tablesToMigrate.sh
+source $contract/tablesToMigrate.sh
 
 
 file_supportTable="helpers/supportTable.cpp"
@@ -62,7 +62,9 @@ if [[ -z "$in_process" || "$in_process" == "1" ]]; then
     sed -i "$((line-1)) r $file_supportTable"  "$file_include"
 
     echo ">>> Pausing all actions while migrating"
-    sed -i -E "/(void|ACTION)(.*)\{/ r $file_checkMigrating" "$file_source"
+    sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
+    sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
+    sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
     echo ">>> Adding first migrate action in $file_source"
     sed -i -E '$a\ \n' "$file_source" 
@@ -71,10 +73,10 @@ if [[ -z "$in_process" || "$in_process" == "1" ]]; then
 
     echo ">>> Adding first migrate action definition in $file_include"
     if  grep "private:" "$file_include"; then
-        sed  -i '/private:/iACTION migrate(uint8_t counter, uint8_t max_number_rows);' "$file_include"
+        sed  -i '/private:/iACTION migrate(uint16_t counter, uint16_t max_number_rows);' "$file_include"
     else
         line=$(grep -n '};' "$file_include" | tail -1 | cut -d : -f 1)
-        sed -i "$((line-1)) a ACTION migrate\(uint8\_t counter\, uint8\_t max\_number\_rows\)\;"  "$file_include"
+        sed -i "$((line-1)) a ACTION migrate\(uint16\_t counter\, uint16\_t max\_number\_rows\)\;"  "$file_include"
     fi
 
 
@@ -98,22 +100,21 @@ sed -i -E '$a\ \n' "$file_include"
 line=$(grep -n '};' "$file_include" | tail -1 | cut -d : -f 1)
 sed -i "$((line-1)) r $file_supportTable"  "$file_include"
 
-
 echo ">>> Pausing all actions while migrating"
-sed -i -E "/(void|ACTION)(.*)\{/ r $file_checkMigrating" "$file_source"
-
+sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
+sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
+sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
 echo ">>> Adding second migrate action in $file_source"
 sed -i -E '$a\ \n' "$file_source"
 cat $file_secondMigrate >> "$file_source"
 
-
 echo ">>> Adding second migrate action definition in $file_include"
 if  grep "private:" "$file_include"; then
-    sed  -i '/private:/iACTION migrate(uint8_t counter, uint8_t max_number_rows);' "$file_include"
+    sed  -i '/private:/iACTION migrate(uint16_t counter, uint16_t max_number_rows);' "$file_include"
 else
     line=$(grep -n '};' "$file_include" | tail -1 | cut -d : -f 1)
-    sed -i "$((line-1)) a ACTION migrate\(uint8\_t counter \, uint8\_t max\_number\_rows\)\;"  "$file_include"
+    sed -i "$((line-1)) a ACTION migrate\(uint16\_t counter \, uint16\_t max\_number\_rows\)\;"  "$file_include"
 fi
 
 
