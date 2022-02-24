@@ -50,11 +50,14 @@ During all the migration process, all the Smart Contract actions will be frozen 
 │ ├─📁 old_contract             - Old contract source code
 │ │ ├─📁 src
 │ │ └─📁 include   
+│ ├─📁 tablesToMigrate           - Contains JSON files containing tables to migrate
+│ │ ├─ ...
+│ │ └─📄 tableX.json               
 │ ├─📄 first_migrate.cpp         - First migration Code
 │ ├─📄 second_migrate.cpp        - Second Migration Code
 │ └─📄 tablesToMigrate.js        - File containing the tables to Migrate
 │
-├─📁 helpers                    - Migration helpers source code (DO NOT MODIFY)
+├─📁 helpers                     - Migration helpers source code (DO NOT MODIFY)
 │ ├─📄 check_is_migrating.cpp    - Code added to the SC actions to freeze them during migration
 │ ├─📄 createSupportTables.sh    - Script to add the support Tables to the Smart Contract  
 │ └─📄 migrateTable.cpp          - Migration table code
@@ -83,15 +86,21 @@ To configure the migration script, the following steps are required:
 
 2. Add the new upgraded SmartContract files to the **new_contract directory**. Files need to be split in *include* and *src*.
 
-3. Add the tables that will be migrated in the **tablesToMigrate.sh** file. Each table to be migrated has to be described in the following format: 
+3. Add the tables that will be migrated in the **tablesToMigrate** folder. Each table to be migrated has to be added in a separate JSON file (doesn't matter the name) in the following format: 
 
-<center> tableX = ("originalTable"  "supportTable"  "originalTableName"  "supportTableName"  "originalTableType"  "supportTableType"). </center>
+```
+{
+    "tableStruct": "",
+    "supportTableStruct": "",
+    "tableName": "",
+    "supportTableName": "",
+    "tableType": "",
+    "supportTableType": ""
+}
+``` 
 
-4. Add an array called ***tables*** containing the names all of the tables that will be migrated in in the **tablesToMigrate.sh** file.
 
-<center> tables = ("table1" "table2" "table3")</center>
-
-5. Modify the migrate action in **first_migrate.cpp** file to copy the tables that are going to be migrated to the corresponding support tables. It is important to use the support table names described in **tablesToMigrate.sh**
+5. Modify the migrate action in **first_migrate.cpp** file to copy the tables that are going to be migrated to the corresponding support tables. It is important to use the support table names described in the JSON file contained in **tablesToMigrate** folder.
 
 6. Modify migrate action in **second_migrate.cpp** file so that the rows contained into the support tables are moved back to the original ones with the modifications applied.
 

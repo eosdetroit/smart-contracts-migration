@@ -1,0 +1,8 @@
+{
+    "tableStruct": "tokendeposit",
+    "supportTableStruct": "supporttkn",
+    "tableName": "tokendeposit",
+    "supportTableName": "supporttkn",
+    "tableType": "token_table",
+    "supportTableType": "support_token_table"
+}

@@ -1,7 +1,6 @@
 #! /bin/bash
 
 set -e
-source helpers/createSupportTables.sh
 
 #contract
 if [ -n "$1" ]; then
@@ -57,10 +56,9 @@ file_include="include/$contract.hpp"
 
 old_sc_directory="contract/old_contract"
 new_sc_directory="contract/new_contract"
+tables_migrate_directory="contract/tablesToMigrate"
 file_firstMigrate="contract/first_migrate.cpp"
 file_secondMigrate="contract/second_migrate.cpp"
-source contract/tablesToMigrate.sh
-
 
 file_supportTable="helpers/supportTable.cpp"
 file_migrateTable="helpers/migrateTable.cpp"
@@ -82,13 +80,8 @@ echo ">>> Creating $file_supportTable"
 cp -r "$old_sc_directory/include/." "./include"
 touch $file_supportTable
 
-for table in "${tables[@]}"
-do  
-    params="${table}[@]"
-    params_array=("${!params}")
-    
-    createSupportTable "${params_array[@]}" $file_supportTable "$file_include"
-done
+source helpers/createSupportTables.sh $tables_migrate_directory $file_supportTable "$file_include"
+
 
 if [[ -z "$in_process" || "$in_process" == "1" ]]; then
     cp -r "$old_sc_directory/src/." "./src"
@@ -224,3 +217,4 @@ build=$( eosio-cpp -I="./$new_sc_directory/include/" "$new_sc_directory/src/$con
 echo ">>> Deploying upgraded SC without migration features"
 deploy=$( cleos -u $url set contract "$account" . "$contract.wasm" "$contract.abi" -p "$account"@$permission_contract && sleep 5 && wait )
 
+rm -rf "$contract.abi" "$contract.wasm" 
