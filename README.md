@@ -6,6 +6,7 @@ Script designed to automate and simplify migrations in EOSIO networks Smart Cont
 <!-- TOC -->
 - [Contents](#contents)
 - [What is it?](#what-is-it)
+- [Main features](#main-features)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -25,6 +26,13 @@ It is an script that allows EOSIO developers to migrate an Smart Contract in an 
 EOSIO Smart Contracts, unlike Ethereum ones, can be modified and upgraded after deployment. However, if a table is modified, a migration is required so that all data stored (old and new) follows the same structure.
 
 Currently, there is no easy way to perform those migrations and the process can became quite tedious.
+
+## Main Features
+
+This script provides users three main advantges:
+- It automatically frozes all the Smart Contract actions, so that nobody can interact with it while the migration is being done.
+- It can be easily integrated with pipelines such as Gitlab
+- It doesn't modify tables names neither type, which could lead to some issues if other SC or some frontends are relying on it.
 
 
 ## How it works?
