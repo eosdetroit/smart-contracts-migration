@@ -52,7 +52,7 @@ if [[ -z "$in_process" || "$in_process" == "1" ]]; then
     echo ">>> Pausing all actions while migrating"
     sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
     sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
-    sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
+    sed -i -E "/^(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
     echo ">>> Adding first migrate action in $file_source"
     sed -i -E '$a\ \n' "$file_source" 
@@ -91,7 +91,7 @@ sed -i "$((line-1)) r $file_supportTable"  "$file_include"
 echo ">>> Pausing all actions while migrating"
 sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
 sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
-sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
+sed -i -E "/^(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
 echo ">>> Adding second migrate action in $file_source"
 sed -i -E '$a\ \n' "$file_source"

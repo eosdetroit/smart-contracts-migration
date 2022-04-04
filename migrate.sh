@@ -46,7 +46,7 @@ fi
 
 
 
-max_number_rows=10;
+max_number_rows=500;
 if [ -n "$6" ]; then
     max_number_rows=$6
 fi
@@ -99,7 +99,7 @@ if [[ -z "$in_process" || "$in_process" == "1" ]]; then
     echo ">>> Pausing all actions while migrating"
     sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
     sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
-    sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
+    sed -i -E "/^(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
     echo ">>> Adding first migrate action in $file_source"
     sed -i -E '$a\ \n' "$file_source" 
@@ -160,7 +160,7 @@ if [[ "$in_process" == "2" ]]; then
     echo ">>> Pausing all actions while migrating"
     sed -i ':r;$!{N;br};s/\n{/{/g' "$file_source"
     sed -i ':r;$!{N;br};s/,\n[ ]*/, /g' "$file_source"
-    sed -i -E "/(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
+    sed -i -E "/^(void|ACTION) $contract\:\:(.)*\{/ r $file_checkMigrating" "$file_source"
 
     echo ">>> Adding second migrate action in $file_source"
     sed -i -E '$a\ \n' "$file_source"  
